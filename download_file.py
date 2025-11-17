@@ -1,6 +1,5 @@
 import requests
 import mimetypes
-import magic
 import os
 
 def download_file(url, local_filename=None):
@@ -23,11 +22,12 @@ def download_file(url, local_filename=None):
 
     # 2. Start the request stream
     try:
+        mime_type = ""
         # Use stream=True to download in chunks
         with requests.get(url, stream=True) as r:
             # Check for successful response
             r.raise_for_status() 
-            
+            mime_type = r.headers['Content-Type'].split(';')[0]
             # 3. Write content in chunks
             with open(local_filename, 'wb') as f:
                 # 8192 bytes (8KB) is a common chunk size
@@ -35,13 +35,12 @@ def download_file(url, local_filename=None):
                     f.write(chunk)
 
         # 4. Verify and adjust file extension if necessary
-        mime_type = magic.from_file(local_filename, mime=True)
         extension = mimetypes.guess_extension(mime_type, strict=False)
         if extension and not local_filename.endswith(extension):
             os.rename(local_filename, local_filename + extension)
         print(f"\n✅ Download successful! File saved to: {os.path.abspath(local_filename)}")
         return True
 
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         print(f"\n❌ An error occurred during download: {e}")
         return False

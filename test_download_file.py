@@ -9,15 +9,13 @@ sys.path.insert(0, '/Users/henry_zheng/python')
 
 class TestDownloadFile(unittest.TestCase):
 
-    @patch('download_file.magic.from_file')
-    @patch('download_file.os.rename')
+
     @patch('download_file.requests.get')
-    def test_download_file_success(self, mock_get, mock_rename, mock_magic):
+    def test_download_file_success(self, mock_get):
         """Test successful file download"""
         mock_response = MagicMock()
         mock_response.iter_content.return_value = [b'test content']
         mock_get.return_value.__enter__.return_value = mock_response
-        mock_magic.return_value = 'text/plain'
         
         with patch('builtins.open', mock_open()):
             result = download_file('http://example.com/file.txt')
@@ -33,8 +31,7 @@ class TestDownloadFile(unittest.TestCase):
         mock_get.return_value.__enter__.return_value = mock_response
         
         with patch('builtins.open', mock_open()):
-            with patch('download_file.magic.from_file', return_value='text/plain'):
-                download_file('http://example.com/path/myfile.pdf')
+            download_file('http://example.com/path/myfile.pdf')
         
         mock_get.assert_called_once_with('http://example.com/path/myfile.pdf', stream=True)
 
@@ -55,8 +52,7 @@ class TestDownloadFile(unittest.TestCase):
         mock_get.return_value.__enter__.return_value = mock_response
         
         with patch('builtins.open', mock_open()):
-            with patch('download_file.magic.from_file', return_value='text/plain'):
-                download_file('http://example.com/file', local_filename='custom.txt')
+            download_file('http://example.com/file', local_filename='custom.txt')
         
         mock_get.assert_called_once()
 
